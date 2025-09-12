@@ -1,0 +1,40 @@
+{
+  "name": "MindCotine",
+  "displayName": "MindCotine",
+  "expo": {
+    "name": "MindCotine",
+    "slug": "MindCotine",
+    "version": "1.0.0",
+    "plugins": [
+      [
+        "@intercom/intercom-react-native",
+        {
+          "appId": "cvhtb46t",
+          "androidApiKey": "android_sdk-89531c4aac524ddf1cf3cfb58d3822c14535f394",
+          "iosApiKey": "ios_sdk-d736bd77d1553b8de9e35c19461ef4975ac4e5ca",
+          "intercomRegion": "EU"
+        }
+      ]
+    ],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.habitfly.mindcotine"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.health.habitfly.mindcotine",
+      "requireFullScreen": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "build": {
+        "publicPath": "./assets",
+        "babel": {
+          "include": ["rn-sliding-up-panel"]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,112 @@
+require File.join(File.dirname(`node --print "require.resolve('expo/package.json')"`), "scripts/autolinking")
+require File.join(File.dirname(`node --print "require.resolve('react-native/package.json')"`), "scripts/react_native_pods")
+require File.join(File.dirname(`node --print "require.resolve('@react-native-community/cli-platform-ios/package.json')"`), "native_modules")
+
+platform :ios, '15.0'
+
+require 'json'
+podfile_properties = JSON.parse(File.read('./Podfile.properties.json')) rescue {}
+
+target 'MindCotine' do
+  use_expo_modules!
+  config = use_native_modules!
+
+  # Firebase dependencies
+  pod 'Firebase/Crashlytics'
+  pod 'Firebase/Analytics'
+  pod 'Firebase/Messaging'
+
+  # React Native dependencies
+  pod 'RNPermissions', :path => '../node_modules/react-native-permissions'
+  permissions_path = '../node_modules/react-native-permissions/ios/Notifications'
+  pod 'Permission-Notifications', :path => "#{permissions_path}/Permission-Notifications.podspec"
+  pod 'RNVectorIcons', :path => '../node_modules/react-native-vector-icons'
+
+  # Force correct versions for Intercom and Sentry
+  pod 'Intercom', '~> 17.1.1'
+  pod 'Sentry/HybridSDK', '= 8.41.0'
+
+  # ✅ Pin gRPC + BoringSSL versions for RN 0.64 compatibility
+  pod 'gRPC-Core', '1.28.2'
+  pod 'gRPC-C++', '1.28.2'
+  pod 'BoringSSL-GRPC', '0.0.7'
+
+  use_react_native!(
+    :path => config[:reactNativePath],
+    :hermes_enabled => podfile_properties['expo.jsEngine'] == 'hermes'
+  )
+
+  pod 'RNGestureHandler', :path => '../node_modules/react-native-gesture-handler'
+
+  post_install do |installer|
+    react_native_post_install(installer)
+
+    # Workaround `Cycle inside FBReactNativeSpec` error for react-native 0.64
+    installer.pods_project.targets.each do |target|
+      installer.pods_project.build_configurations.each do |config|
+        config.build_settings["ONLY_ACTIVE_ARCH"] = "NO"
+      end
+
+      if (target.name&.eql?('FBReactNativeSpec'))
+        target.build_phases.each do |build_phase|
+          if (build_phase.respond_to?(:name) && build_phase.name.eql?('[CP-User] Generate Specs'))
+            target.build_phases.move(build_phase, 0)
+          end
+        end
+      end
+    end
+
+    # Fix for Swift library search paths
+    installer.aggregate_targets.each do |aggregate_target|
+      aggregate_target.user_project.native_targets.each do |target|
+        target.build_configurations.each do |config|
+          config.build_settings['LIBRARY_SEARCH_PATHS'] = [
+            '$(SDKROOT)/usr/lib/swift',
+            '$(inherited)'
+          ]
+        end
+      end
+      aggregate_target.user_project.save
+    end
+
+    # ✅ Fix: Remove unsupported '-G' flag & ensure headers for BoringSSL-GRPC
+    installer.pods_project.targets.each do |target|
+      if target.name == 'BoringSSL-GRPC'
+        target.build_configurations.each do |config|
+          %w[OTHER_CFLAGS OTHER_CPLUSPLUSFLAGS].each do |flag_type|
+            if config.build_settings[flag_type].is_a?(Array)
+              config.build_settings[flag_type].delete('-G')
+            elsif config.build_settings[flag_type].is_a?(String)
+              config.build_settings[flag_type] = config.build_settings[flag_type].gsub('-G', '')
+            end
+          end
+
+          # ✅ Add correct header paths for openssl_grpc
+          config.build_settings['HEADER_SEARCH_PATHS'] ||= ['$(inherited)']
+          config.build_settings['HEADER_SEARCH_PATHS'] << "${PODS_ROOT}/BoringSSL-GRPC/src/include"
+          config.build_settings['HEADER_SEARCH_PATHS'] << "${PODS_ROOT}/Headers/Public/openssl_grpc"
+          config.build_settings['HEADER_SEARCH_PATHS'] << "${PODS_ROOT}/BoringSSL-GRPC/include"
+        end
+
+        # ✅ Remove problematic compiler flags from source files
+        target.source_build_phase.files.each do |file|
+          if file.settings && file.settings['COMPILER_FLAGS']
+            flags = file.settings['COMPILER_FLAGS'].split
+            flags.reject! { |flag| flag == '-GCC_WARN_INHIBIT_ALL_WARNINGS' }
+            file.settings['COMPILER_FLAGS'] = flags.join(' ')
+          end
+        end
+      end
+    end
+
+    # ✅ Clean xcconfig files in case '-G' is written there
+    Dir.glob(File.join(__dir__, 'Pods/Target Support Files/**/*.xcconfig')).each do |xcconfig_file|
+      text = File.read(xcconfig_file)
+      new_text = text.gsub('-G', '')
+      File.open(xcconfig_file, 'w') { |f| f.puts new_text }
+    end
+
+    # Fix for Xcode 15
+    system('sh fix-build-for-xcode15.sh')
+  end
+end
