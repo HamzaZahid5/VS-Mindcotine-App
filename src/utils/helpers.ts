@@ -211,38 +211,38 @@ export const calculateProgramCompletion = (program: ProgramType, progressArray: 
   return Math.round(progress * 100)
 }
 
-export const checkNotificationPermission = async () => {
-  let resultAndroid
-  let resultIOS
+// export const checkNotificationPermission = async () => {
+//   let resultAndroid
+//   let resultIOS
 
-  if (Platform.OS === 'android') {
-    resultAndroid = await check(PERMISSIONS.ANDROID.POST_NOTIFICATIONS)
-  } else if (Platform.OS === 'ios') {
-    resultIOS = await checkNotifications()
-  }
+//   if (Platform.OS === 'android') {
+//     resultAndroid = await check(PERMISSIONS.ANDROID.POST_NOTIFICATIONS)
+//   } else if (Platform.OS === 'ios') {
+//     resultIOS = await checkNotifications()
+//   }
 
-  if (Platform.OS === 'android' && resultAndroid === RESULTS.GRANTED) {
-    console.log('Permission granted ANDROID')
-  } else if (Platform.OS === 'ios' && resultIOS?.status === 'granted') {
-    console.log('Permission granted IOS')
-  } else {
-    requestNotificationPermission()
-  }
-}
+//   if (Platform.OS === 'android' && resultAndroid === RESULTS.GRANTED) {
+//     console.log('Permission granted ANDROID')
+//   } else if (Platform.OS === 'ios' && resultIOS?.status === 'granted') {
+//     console.log('Permission granted IOS')
+//   } else {
+//     requestNotificationPermission()
+//   }
+// }
 
-const requestNotificationPermission = async () => {
-  let resultAndroid
-  let resultIOS
+// const requestNotificationPermission = async () => {
+//   let resultAndroid
+//   let resultIOS
 
-  if (Platform.OS === 'android') {
-    resultAndroid = await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS)
-  } else if (Platform.OS === 'ios') {
-    resultIOS = await requestNotifications(['alert', 'badge', 'sound'])
-  }
+//   if (Platform.OS === 'android') {
+//     resultAndroid = await request(PERMISSIONS.ANDROID.POST_NOTIFICATIONS)
+//   } else if (Platform.OS === 'ios') {
+//     resultIOS = await requestNotifications(['alert', 'badge', 'sound'])
+//   }
 
-  if (Platform.OS === 'android' && resultAndroid === RESULTS.GRANTED) {
-    console.log('Permission granted ANDROID')
-  } else if (Platform.OS === 'ios' && resultIOS?.status === 'granted') {
-    console.log('Permission granted IOS')
-  }
-}
+//   if (Platform.OS === 'android' && resultAndroid === RESULTS.GRANTED) {
+//     console.log('Permission granted ANDROID')
+//   } else if (Platform.OS === 'ios' && resultIOS?.status === 'granted') {
+//     console.log('Permission granted IOS')
+//   }
+// }

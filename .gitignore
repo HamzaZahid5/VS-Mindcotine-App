@@ -133,4 +133,8 @@ buck-out/
 web-build/
 dist/
 
+# Yarn & npm config
+.yarnrc
+.npmrc
+
 # @end expo-cli

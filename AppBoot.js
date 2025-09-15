@@ -1,17 +1,25 @@
-/**
- * File for web:
- *  let Expo to start the app and avoid using AppRegistry
- */
+// import 'react-native-gesture-handler'
+// import { registerRootComponent } from 'expo'
+// import injectFirebaseAndBootUp from './src/utils/FirebaseForWeb'
+// import App from './App'
+
+// // Modify to ensure `registerRootComponent` is executed after Firebase is initialized
+// export default () => {
+//   injectFirebaseAndBootUp(() => {
+//     // Call this only after Firebase is initialized
+//     registerRootComponent(App)
+//   })
+// }
+
 import 'react-native-gesture-handler'
 import { registerRootComponent } from 'expo'
 import injectFirebaseAndBootUp from './src/utils/FirebaseForWeb'
-
 import App from './App'
 
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in the Expo client or in a native build,
-// the environment is set up appropriately
-export default () =>
+// Call registerRootComponent after Firebase has been initialized
+export default () => {
   injectFirebaseAndBootUp(() => {
+    // Only call registerRootComponent after Firebase is initialized
     registerRootComponent(App)
   })
+}

@@ -79,11 +79,11 @@ static void InitializeFlipper(UIApplication *application) {
   //   controller.delegate = self;
   //   [controller startAndShowLaunchScreen:self.window];
   // #endif
-  RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:launchOptions];
+  RCTBridge *bridge = [self.reactDelegate createBridgeWithDelegate:self launchOptions:launchOptions];
   #if RCT_DEV
     [bridge moduleForClass:[RCTDevLoadingView class]];
   #endif
-  RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"main" initialProperties:nil];
+  RCTRootView *rootView = [self.reactDelegate createRootViewWithBridge:bridge moduleName:@"main" initialProperties:nil];
   id rootViewBackgroundColor = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"RCTRootViewBackgroundColor"];
   if (rootViewBackgroundColor != nil) {
     rootView.backgroundColor = [RCTConvert UIColor:rootViewBackgroundColor];
@@ -92,26 +92,25 @@ static void InitializeFlipper(UIApplication *application) {
   }
 
   self.window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-  UIViewController *rootViewController = [UIViewController new];
+  UIViewController *rootViewController = [self.reactDelegate createRootViewController];
   rootViewController.view = rootView;
   self.window.rootViewController = rootViewController;
-  
-  [IntercomModule initialize:@"ios_sdk-d736bd77d1553b8de9e35c19461ef4975ac4e5ca" withAppId:@"cvhtb46t"];
 
   [self.window makeKeyAndVisible];
 
   [super application:application didFinishLaunchingWithOptions:launchOptions];
 
+  [IntercomModule initialize:@"ios_sdk-d736bd77d1553b8de9e35c19461ef4975ac4e5ca" withAppId:@"cvhtb46t"];
   return YES;
 }
 
 // - (RCTBridge *)initializeReactNativeApp
 // {
-//   RCTBridge *bridge = [[RCTBridge alloc] initWithDelegate:self launchOptions:self.launchOptions];
-//   RCTRootView *rootView = [[RCTRootView alloc] initWithBridge:bridge moduleName:@"main" initialProperties:nil];
+//   RCTBridge *bridge = [self.reactDelegate createBridgeWithDelegate:self launchOptions:self.launchOptions];
+//   RCTRootView *rootView = [self.reactDelegate createRootViewWithBridge:bridge moduleName:@"main" initialProperties:nil];
 //   rootView.backgroundColor = [[UIColor alloc] initWithRed:0.24 green:0.60 blue:0.84 alpha:1.00];
 
-// //  UIViewController *rootViewController = [UIViewController new];
+// //  UIViewController *rootViewController = [self.reactDelegate createRootViewController];
 //   UIViewController *rootViewController = [[EXScreenOrientationViewController alloc] init
 // ]; // The default screen orientation will be set to `portrait`.
 //   rootViewController.view = rootView;

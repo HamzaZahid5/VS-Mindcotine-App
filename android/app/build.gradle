@@ -2,7 +2,6 @@ apply plugin: "com.android.application"
 apply plugin: "com.google.gms.google-services"
 apply plugin: "com.google.firebase.crashlytics"
 apply plugin: 'kotlin-parcelize'
-apply plugin: 'com.google.gms.google-services'
  
 project.ext.react = [
     enableHermes: (findProperty('expo.jsEngine') ?: "jsc") == "hermes",
@@ -76,10 +75,11 @@ android {
 dependencies {
     implementation fileTree(dir: "libs", include: ["*.jar"])
     implementation "com.facebook.react:react-native:+"  // From node_modules
- 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
     implementation "androidx.multidex:multidex:2.0.1"
- 
+    implementation project(':@react-native-firebase_app')
+    implementation project(':react-native-async-storage')
+    implementation project(':react-native-gesture-handler')
     // Firebase
     implementation "com.google.firebase:firebase-analytics:21.5.0"
     implementation "com.google.firebase:firebase-crashlytics:18.6.2"
@@ -87,6 +87,11 @@ dependencies {
     // Intercom
     implementation 'io.intercom.android:intercom-sdk-base:14.+'
     implementation 'io.intercom.android:intercom-sdk-fcm:14.+'
+    implementation project(':react-native-permissions')
+    implementation project(':react-native-reanimated')
+    implementation project(':react-native-utils-scale')
+    implementation project(':react-native-webview')
+    // implementation 'com.reactnative:webview:11.0.0'
  
     if (project.ext.react.get("enableHermes", false)) {
         implementation files("$rootDir/../node_modules/hermes-engine/android/hermes-release.aar")
