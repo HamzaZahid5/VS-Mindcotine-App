@@ -3,11 +3,11 @@ rootProject.name = 'MindCotine'
 include ':react-native-utils-scale'
 project(':react-native-utils-scale').projectDir = new File(rootProject.projectDir, '../node_modules/react-native-utils-scale/android')
 
-def resolveNodeModuleDir(String packageName) {
+def resolveNodeModulePackageJson(String packageName) {
     try {
         def path = ["node", "--print", "require.resolve('${packageName}/package.json')"].execute(null, rootDir).text.trim()
         if (path) {
-            return new File(path).getParentFile()
+            return new File(path)
         }
     } catch (Exception ignored) {
         println("[settings.gradle] Could not resolve package '${packageName}': ${ignored.message}")
@@ -15,15 +15,15 @@ def resolveNodeModuleDir(String packageName) {
     return null
 }
 
-def expoPackageDir = resolveNodeModuleDir('expo')
-if (expoPackageDir) {
-    apply from: new File(expoPackageDir, "../scripts/autolinking.gradle")
+def expoPackageJson = resolveNodeModulePackageJson('expo')
+if (expoPackageJson?.exists()) {
+    apply from: new File(expoPackageJson, "../scripts/autolinking.gradle")
     useExpoModules()
 }
 
-def cliAndroidDir = resolveNodeModuleDir('@react-native-community/cli-platform-android')
-if (cliAndroidDir) {
-    apply from: new File(cliAndroidDir, "../native_modules.gradle")
+def cliAndroidPackageJson = resolveNodeModulePackageJson('@react-native-community/cli-platform-android')
+if (cliAndroidPackageJson?.exists()) {
+    apply from: new File(cliAndroidPackageJson, "../native_modules.gradle")
     applyNativeModulesSettingsGradle(settings)
 }
 
