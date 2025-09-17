@@ -28,3 +28,5 @@ if (cliAndroidPackageJson?.exists()) {
 }
 
 include ':app'
+include ':android-scalablevideoview'
+project(':android-scalablevideoview').projectDir = new File(rootProject.projectDir, 'android-scalablevideoview')

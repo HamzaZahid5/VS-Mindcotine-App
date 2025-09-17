@@ -2,23 +2,26 @@
  
 buildscript {
     ext {
-        buildToolsVersion = "33.0.2"
+        buildToolsVersion = "30.0.3"
         minSdkVersion = 23
-        compileSdkVersion = 33
-        targetSdkVersion = 33
-        kotlinVersion = '1.8.22'
+        compileSdkVersion = 31
+        targetSdkVersion = 31
+        kotlinVersion = '1.5.31'
     }
     repositories {
         google()
         mavenCentral()
+        jcenter()
+        maven { url 'https://jcenter.bintray.com' }
         maven { url 'https://www.jitpack.io' }
+        maven { url 'https://jitpack.io' }
         maven { url 'https://expo.github.io/maven' }
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.4.2")
+        classpath("com.android.tools.build:gradle:4.2.2")
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
-        classpath 'com.google.gms:google-services:4.3.15'
-        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.9.9'
+        classpath 'com.google.gms:google-services:4.3.10'
+        classpath 'com.google.firebase:firebase-crashlytics-gradle:2.8.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
@@ -43,6 +46,17 @@ allprojects {
     configurations.all {
         resolutionStrategy {
             force "com.facebook.react:react-native:" + REACT_NATIVE_VERSION
+            force 'com.google.guava:guava:31.1-android'
+            dependencySubstitution {
+                substitute module('com.yqritc:android-scalablevideoview') with project(':android-scalablevideoview')
+                // Replace legacy artifact no longer available on JCenter with the current one on Maven Central
+                substitute module('com.eightbitlab:blurview') with module('com.github.Dimezis:BlurView:version-2.0.5')
+            }
+            eachDependency { details ->
+                if (details.requested.group == 'com.google.android.exoplayer') {
+                    details.useVersion '2.13.3'
+                }
+            }
         }
     }
  
@@ -63,9 +77,33 @@ allprojects {
         mavenCentral()
         maven { url 'https://www.jitpack.io' }
         maven { url "https://expo.github.io/maven" }
+        // Explicit mirrors in case defaults fail to resolve legacy artifacts
+        maven { url 'https://repo1.maven.org/maven2' }
+        maven { url 'https://maven.google.com' }
+        // ExoPlayer legacy artifacts for expo-av
+        maven { url 'https://dl.google.com/exo-player/maven/' }
+        maven { url 'https://jcenter.bintray.com' }
+        maven { url 'https://jitpack.io' }
+        jcenter()
         maven {
             // All of Detox' artifacts are provided via the npm module
             url "$rootDir/../node_modules/detox/Detox-android"
+        }
+    }
+}
+
+// Ensure compile/target/min SDK are set for subprojects like :expo
+subprojects { subproject ->
+    afterEvaluate {
+        if (subproject.hasProperty('android')) {
+            def androidExt = subproject.extensions.findByName('android')
+            if (androidExt != null) {
+                androidExt.compileSdkVersion = rootProject.ext.compileSdkVersion
+                if (androidExt.hasProperty('defaultConfig')) {
+                    androidExt.defaultConfig.minSdkVersion rootProject.ext.minSdkVersion
+                    androidExt.defaultConfig.targetSdkVersion rootProject.ext.targetSdkVersion
+                }
+            }
         }
     }
 }
