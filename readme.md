@@ -1,6 +1,7 @@
 ## Ease your stress and anxiety
 
 ### Devel notes
+- Install JDK 11 (LTS) and ensure `JAVA_HOME` points to it so Android builds use the expected toolchain.
 - clone repo
 - `yarn install`
 - `yarn run
